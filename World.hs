@@ -5,9 +5,11 @@ where
 
 newtype Oid = Oid Int
 
-data Room = Room { rmOid :: Oid
-                 , rmName :: String
-                 , rmDesc :: String
-                 }
+data Coord = Coord Int Int
+
+data Terrain = Nothing | Water | 
+
+data Cells = [
+
 
 version = "0.0.1"
