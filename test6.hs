@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
 
 module Main (
 main
@@ -6,7 +6,7 @@ main
 where 
 
 import Control.Concurrent (forkIO, MVar, newEmptyMVar, putMVar, takeMVar, ThreadId, threadDelay)
-import Control.Monad (forever)
+import Control.Monad (forever, liftM)
 
 {-
 class Stream a b where
@@ -17,20 +17,29 @@ instance Stream d where
     stream f g = g . f
 -}
 
+class Stream a b where
+    (->>) :: IO a -> (a -> IO b) -> IO b
+
+instance Stream a () where
+    f ->> g = f >>= g
+
+{-
 (->>) :: IO a -> (a -> IO ()) -> IO ()
 f ->> g = f >>= g
-
+-}
 
 -- This simply wraps a string in brackets.
 bracket :: String -> String
 bracket x = "(" ++ x ++ ")"
 
+lbracket :: IO String -> IO String
+lbracket x = liftM bracket x
+
 -- Just like C's main.
 main :: IO ()
 main = do
        --forkIO $ getLine >>= putStrLn
-       forkIO $ getLine ->> putStrLn
-       forkIO $ getLine ->> putStrLn
+       forkIO $ getLine ->> lbracket ->> putStrLn
        --wbracket = lft bracket 
        --getLine ->> wbracket ->> putStrLn 
        threadDelay 10000000 -- Sleep for at least 10 seconds before exiting.
