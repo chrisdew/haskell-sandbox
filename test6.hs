@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeSynonymInstances #-}
 
 module Main (
 main
@@ -23,6 +23,9 @@ class Stream a b where
 instance Stream a () where
     f ->> g = f >>= g
 
+instance Stream String String where
+    f ->> g = f >>= g
+
 {-
 (->>) :: IO a -> (a -> IO ()) -> IO ()
 f ->> g = f >>= g
@@ -35,11 +38,18 @@ bracket x = "(" ++ x ++ ")"
 lbracket :: IO String -> IO String
 lbracket x = liftM bracket x
 
+hello :: String
+hello = "Hello World!"
+
+lhello :: IO String
+lhello = do return hello
+
 -- Just like C's main.
 main :: IO ()
 main = do
        --forkIO $ getLine >>= putStrLn
-       forkIO $ getLine ->> lbracket ->> putStrLn
+       --forkIO $ getLine ->> lbracket ->> putStrLn
+       forkIO $ lhello ->> putStrLn
        --wbracket = lft bracket 
        --getLine ->> wbracket ->> putStrLn 
        threadDelay 10000000 -- Sleep for at least 10 seconds before exiting.
