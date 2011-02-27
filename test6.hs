@@ -9,16 +9,19 @@ where
 import Control.Concurrent (forkIO, MVar, newEmptyMVar, putMVar, takeMVar, ThreadId, threadDelay)
 import Control.Monad (forever, liftM)
 
-class Stream a b c where
-    (->>) :: a -> b -> c
+class Stream a b c d where
+    (->>) :: a -> (b -> c) -> d
 
-instance Stream (IO d) (d -> IO c) (IO c) where
+instance Stream (
+putMVar f
+
+instance Stream (IO d) d (IO c) (IO c) where
     f ->> g = f >>= g 
 
-instance Stream d (d -> IO c) (IO c) where
+instance Stream d d (IO c) (IO c) where
     f ->> g = g f 
 
-instance Stream d (d -> c) c where
+instance Stream d d c c where
     x ->> y = y $ x
 
 x ->>> y = y $ x
@@ -42,7 +45,7 @@ main = do
        --forkIO $ getLine >>= putStrLn
        --forkIO $ (lhello ->> bracket) ->> putStrLn
        forkIO $ (bracket $ hello) ->> putStrLn
-       --forkIO $ (hello ->> bracket) ->> putStrLn
+       forkIO $ (lhello ->>> lbracket) ->> putStrLn
        forkIO $ bracket hello ->> putStrLn
        forkIO $ lbracket lhello ->> putStrLn
        --wbracket = lft bracket 
