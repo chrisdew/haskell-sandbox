@@ -1,4 +1,5 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeSynonymInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeSynonymInstances, OverlappingInstances #-}
+{-# OPTIONS_GHC #-}
 
 module Main (
 main
@@ -17,10 +18,10 @@ instance Stream (IO d) (d -> IO c) (IO c) where
 instance Stream d (d -> IO c) (IO c) where
     f ->> g = g f 
 
-{-
-(->>) :: IO a -> (a -> IO ()) -> IO ()
-f ->> g = f >>= g
--}
+instance Stream d (d -> c) c where
+    x ->> y = y $ x
+
+x ->>> y = y $ x
 
 -- This simply wraps a string in brackets.
 bracket :: String -> String
@@ -39,8 +40,11 @@ lhello = do return hello
 main :: IO ()
 main = do
        --forkIO $ getLine >>= putStrLn
-       --forkIO $ lhello ->> lbracket ->> putStrLn
-       forkIO $ lhello ->> putStrLn
+       --forkIO $ (lhello ->> bracket) ->> putStrLn
+       forkIO $ (bracket $ hello) ->> putStrLn
+       --forkIO $ (hello ->> bracket) ->> putStrLn
+       forkIO $ bracket hello ->> putStrLn
+       forkIO $ lbracket lhello ->> putStrLn
        --wbracket = lft bracket 
        --getLine ->> wbracket ->> putStrLn 
        threadDelay 10000000 -- Sleep for at least 10 seconds before exiting.
